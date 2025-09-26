@@ -6,37 +6,26 @@ import (
 
 func (p *EmailParser) DebugShow() {
 	// 激活获取所有字段
-	p.GetMessageID()
-	p.GetSubject()
-	p.GetDate()
-	p.GetDateUnix()
-	p.GetFrom()
-	p.GetTo()
-	p.GetCc()
-	p.GetBcc()
-	p.GetSender()
-	p.GetReplyTo()
-	p.GetDispositionNotificationTo()
 	// 输出邮件头信息
-	fmt.Printf("Message-ID: %s\n", p.messageID)
-	fmt.Printf("Subject: %s\n", p.subject)
-	fmt.Printf("Date: %s, unix: %d\n", p.date, p.dateUnix)
-	fmt.Printf("From: %s <%s>\n", p.from.Name, p.from.Email)
+	fmt.Printf("Message-ID: %s\n", p.MessageID)
+	fmt.Printf("Subject: %s\n", p.Subject)
+	fmt.Printf("Date: %s, unix: %d\n", p.Date, p.DateUnix)
+	fmt.Printf("From: %s <%s>\n", p.From.Name, p.From.Email)
 	fmt.Printf("To:\n")
-	for _, to := range p.to {
+	for _, to := range p.To {
 		fmt.Printf("  %s <%s>; %s\n", to.Name, to.Email, string(to.NameRaw))
 	}
 	fmt.Printf("Cc:\n")
-	for _, cc := range p.cc {
+	for _, cc := range p.Cc {
 		fmt.Printf("  %s <%s>\n", cc.Name, cc.Email)
 	}
 	fmt.Printf("Bcc:\n")
-	for _, bcc := range p.bcc {
+	for _, bcc := range p.Bcc {
 		fmt.Printf("  %s <%s>\n", bcc.Name, bcc.Email)
 	}
-	fmt.Printf("Sender: %s <%s>\n", p.sender.Name, p.sender.Email)
-	fmt.Printf("Reply-To: %s <%s>\n", p.replyTo.Name, p.replyTo.Email)
-	fmt.Printf("Disposition-Notification-To: %s <%s>\n", p.dispositionNotificationTo.Name, p.dispositionNotificationTo.Email)
+	fmt.Printf("Sender: %s <%s>\n", p.Sender.Name, p.Sender.Email)
+	fmt.Printf("Reply-To: %s <%s>\n", p.ReplyTo.Name, p.ReplyTo.Email)
+	fmt.Printf("Disposition-Notification-To: %s <%s>\n", p.DispositionNotificationTo.Name, p.DispositionNotificationTo.Email)
 	fmt.Printf("References:\n")
 	for _, ref := range p.GetReferences() {
 		fmt.Printf("  %s\n", ref)

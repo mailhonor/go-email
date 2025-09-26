@@ -66,38 +66,28 @@ type EmailParserOptions struct {
 }
 
 type EmailParser struct {
-	DefaultCharset                  string
-	EmailData                       []byte
-	topNode                         *MIMENode
-	messageID                       string
-	messageIDDealed                 bool
-	subject                         string
-	subjectDealed                   bool
-	date                            string
-	dateUnix                        int64
-	dateDealed                      bool
-	from                            MimeAddress
-	fromDealed                      bool
-	to                              []MimeAddress
-	toDealed                        bool
-	cc                              []MimeAddress
-	ccDealed                        bool
-	bcc                             []MimeAddress
-	bccDealed                       bool
-	sender                          MimeAddress
-	senderDealed                    bool
-	replyTo                         MimeAddress
-	replyToDealed                   bool
-	dispositionNotificationTo       MimeAddress
-	dispositionNotificationToDealed bool
-	references                      []string
-	referencesDealed                bool
-	textNodes                       []*MIMENode
-	attachmentNodes                 []*MIMENode
-	nodeClassified                  bool
-	alternativeShowNodes            []*MIMENode
-	alternativeShowNodesDealed      bool
-	inlineAttachmentNodesDealed     bool
+	DefaultCharset              string
+	EmailData                   []byte
+	topNode                     *MIMENode
+	MessageID                   string
+	Subject                     string
+	Date                        string
+	DateUnix                    int64
+	From                        MimeAddress
+	To                          []MimeAddress
+	Cc                          []MimeAddress
+	Bcc                         []MimeAddress
+	Sender                      MimeAddress
+	ReplyTo                     MimeAddress
+	DispositionNotificationTo   MimeAddress
+	references                  []string
+	referencesDealed            bool
+	textNodes                   []*MIMENode
+	attachmentNodes             []*MIMENode
+	nodeClassified              bool
+	alternativeShowNodes        []*MIMENode
+	alternativeShowNodesDealed  bool
+	inlineAttachmentNodesDealed bool
 }
 
 // boundaryPos 记录一个边界符的位置信息
@@ -354,21 +344,21 @@ func (p *EmailParser) parseMime(offset int, emailPartData []byte, boundaries []b
 func (p *EmailParser) parseDate() {
 	date, err := p.topNode.GetHeaderValue("DATE")
 	if err == nil {
-		p.date = strings.TrimSpace(string(date))
+		p.Date = strings.TrimSpace(string(date))
 	} else {
 		received, err := p.topNode.GetHeaderValue("RECEIVED")
 		if err == nil {
 			s := string(received)
 			pos := strings.LastIndex(s, ";")
 			if pos > 0 {
-				p.date = strings.TrimSpace(s[pos+1:])
+				p.Date = strings.TrimSpace(s[pos+1:])
 			}
 		}
 	}
-	if p.date != "" {
-		t, err := mail.ParseDate(p.date)
+	if p.Date != "" {
+		t, err := mail.ParseDate(p.Date)
 		if err == nil {
-			p.dateUnix = t.Unix()
+			p.DateUnix = t.Unix()
 		}
 	}
 }
@@ -384,110 +374,25 @@ func EmailParserNew(options EmailParserOptions) *EmailParser {
 	//
 	boundaries := scanAllBoundaries(parser.EmailData)
 	parser.topNode = parser.parseMime(0, parser.EmailData, boundaries)
+	topNode := parser.topNode
+	defaultCharset := parser.DefaultCharset
 	//
+	parser.MessageID = string(mailhonorstringutils.TrimBytes(topNode.GetHeaderValueIgnoreNotFound("MESSAGE-ID"), []byte("\"<>\r\n\t ")))
+	parser.parseDate()
+	parser.Subject = ParseMimeValueString(topNode.GetHeaderValueIgnoreNotFound("SUBJECT"), defaultCharset)
+	parser.From = ParseMimeAddressFirstOne(topNode.GetHeaderValueIgnoreNotFound("FROM"), defaultCharset)
+	parser.To = ParseMimeAddress(topNode.GetHeaderValueIgnoreNotFound("TO"), defaultCharset)
+	parser.Cc = ParseMimeAddress(topNode.GetHeaderValueIgnoreNotFound("CC"), defaultCharset)
+	parser.Bcc = ParseMimeAddress(topNode.GetHeaderValueIgnoreNotFound("BCC"), defaultCharset)
+	parser.Sender = ParseMimeAddressFirstOne(topNode.GetHeaderValueIgnoreNotFound("SENDER"), defaultCharset)
+	parser.ReplyTo = ParseMimeAddressFirstOne(topNode.GetHeaderValueIgnoreNotFound("REPLY-TO"), defaultCharset)
+	parser.DispositionNotificationTo = ParseMimeAddressFirstOne(topNode.GetHeaderValueIgnoreNotFound("DISPOSITION-NOTIFICATION-TO"), defaultCharset)
+
 	return parser
 }
 
 func (p *EmailParser) GetTopMIMENode() *MIMENode {
 	return p.topNode
-}
-
-func (p *EmailParser) GetMessageID() string {
-	if p.messageIDDealed {
-		return p.messageID
-	}
-	p.messageID = string(mailhonorstringutils.TrimBytes(p.topNode.GetHeaderValueIgnoreNotFound("MESSAGE-ID"), []byte("\"<>\r\n\t ")))
-	return p.messageID
-}
-
-func (p *EmailParser) GetSubject() string {
-	if p.subjectDealed {
-		return p.subject
-	}
-	p.subjectDealed = true
-	p.subject = ParseMimeValueString(p.topNode.GetHeaderValueIgnoreNotFound("SUBJECT"), p.DefaultCharset)
-	return p.subject
-}
-
-func (p *EmailParser) GetDate() string {
-	if p.dateDealed {
-		return p.date
-	}
-	p.dateDealed = true
-	p.parseDate()
-	return p.date
-}
-
-func (p *EmailParser) GetDateUnix() int64 {
-	if p.dateDealed {
-		return p.dateUnix
-	}
-	p.dateDealed = true
-	p.parseDate()
-	return p.dateUnix
-}
-
-func (p *EmailParser) GetFrom() MimeAddress {
-	if p.fromDealed {
-		return p.from
-	}
-	p.fromDealed = true
-	p.from = ParseMimeAddressFirstOne(p.topNode.GetHeaderValueIgnoreNotFound("FROM"), p.DefaultCharset)
-	return p.from
-}
-
-func (p *EmailParser) GetTo() []MimeAddress {
-	if p.toDealed {
-		return p.to
-	}
-	p.toDealed = true
-	p.to = ParseMimeAddress(p.topNode.GetHeaderValueIgnoreNotFound("TO"), p.DefaultCharset)
-	return p.to
-}
-
-func (p *EmailParser) GetCc() []MimeAddress {
-	if p.ccDealed {
-		return p.cc
-	}
-	p.ccDealed = true
-	p.cc = ParseMimeAddress(p.topNode.GetHeaderValueIgnoreNotFound("CC"), p.DefaultCharset)
-	return p.cc
-}
-
-func (p *EmailParser) GetBcc() []MimeAddress {
-	if p.bccDealed {
-		return p.bcc
-	}
-	p.bccDealed = true
-	p.bcc = ParseMimeAddress(p.topNode.GetHeaderValueIgnoreNotFound("BCC"), p.DefaultCharset)
-	return p.bcc
-}
-
-func (p *EmailParser) GetSender() MimeAddress {
-	if p.senderDealed {
-		return p.sender
-	}
-	p.senderDealed = true
-	p.sender = ParseMimeAddressFirstOne(p.topNode.GetHeaderValueIgnoreNotFound("SENDER"), p.DefaultCharset)
-	return p.sender
-}
-
-func (p *EmailParser) GetReplyTo() MimeAddress {
-	if p.replyToDealed {
-		return p.replyTo
-	}
-	p.replyToDealed = true
-	p.replyTo = ParseMimeAddressFirstOne(p.topNode.GetHeaderValueIgnoreNotFound("REPLY-TO"), p.DefaultCharset)
-	return p.replyTo
-}
-
-func (p *EmailParser) GetDispositionNotificationTo() MimeAddress {
-	if p.dispositionNotificationToDealed {
-		return p.dispositionNotificationTo
-	}
-	p.dispositionNotificationToDealed = true
-	p.dispositionNotificationTo = ParseMimeAddressFirstOne(p.topNode.GetHeaderValueIgnoreNotFound("DISPOSITION-NOTIFICATION-TO"), p.DefaultCharset)
-	return p.dispositionNotificationTo
 }
 
 func (p *EmailParser) GetReferences() []string {
