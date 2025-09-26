@@ -1,3 +1,5 @@
+github.com/mailhonor/go-utils v0.0.0-20250926032256-5528a6abcc3d h1:pBo+Jq+tzshH1+BhckORmzoVnMZOlr7YGE5l/WWKbeY=
+github.com/mailhonor/go-utils v0.0.0-20250926032256-5528a6abcc3d/go.mod h1:uJ0Y/y9zA0bGPGr7mgPlqAxXWmpgKLH3/PnPq00v9Ac=
 github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d h1:hrujxIzL1woJ7AwssoOcM/tq5JjjG2yYOc8odClEiXA=
 github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d/go.mod h1:uugorj2VCxiV1x+LzaIdVa9b4S4qGAcH6cbhh4qVxOU=
 golang.org/x/text v0.29.0 h1:1neNs90w9YzJ9BocxfsQNHKuAT4pkghyXc4nhZ6sJvk=
