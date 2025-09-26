@@ -180,12 +180,12 @@ func (n *MIMENode) IsTnef(headerName string) bool {
 	return n.isTnef
 }
 
-func IsInlineAttachment(n *MIMENode) bool {
+func (n *MIMENode) IsInlineAttachment() bool {
 	n.EmailParser.classifyInlineAttachmentNodes()
 	return n.isInline
 }
 
-func GetDecodedContent(n *MIMENode) []byte {
+func (n *MIMENode) GetDecodedContent() []byte {
 	parser := n.EmailParser
 	if n.Encoding == "BASE64" {
 		decodedData, err := base64.StdEncoding.DecodeString(string(parser.EmailData[n.BodyStart : n.BodyStart+n.BodyLen]))
@@ -201,8 +201,8 @@ func GetDecodedContent(n *MIMENode) []byte {
 }
 
 // text cotnent
-func GetDecodedTextContent(n *MIMENode) string {
-	data := GetDecodedContent(n)
+func (n *MIMENode) GetDecodedTextContent() string {
+	data := n.GetDecodedContent()
 	return mailhonorcharsetutils.ConvertToUTF8(data, n.Charset, n.EmailParser.DefaultCharset)
 }
 
@@ -575,7 +575,7 @@ func (p *EmailParser) classifyInlineAttachmentNodes() {
 
 	var conBuilder strings.Builder
 	for _, n := range p.alternativeShowNodes {
-		conBuilder.WriteString(string(GetDecodedContent(n)))
+		conBuilder.WriteString(string(n.GetDecodedContent()))
 		conBuilder.WriteString("\n")
 	}
 	con := strings.ToLower(conBuilder.String())

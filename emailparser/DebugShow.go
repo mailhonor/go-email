@@ -44,7 +44,7 @@ func (p *EmailParser) DebugShow() {
 		fmt.Printf("Content-Type: %s\n", n.ContentType)
 		fmt.Printf("Encoding: %s\n", n.Encoding)
 		fmt.Printf("Charset: %s\n", n.Charset)
-		con := GetDecodedTextContent(n)
+		con := n.GetDecodedTextContent()
 		fmt.Printf("Size: %d\n", len([]byte(con)))
 		if len(con) > 120 {
 			con = con[0:120] + "..."
@@ -59,8 +59,8 @@ func (p *EmailParser) DebugShow() {
 		fmt.Printf("Content-ID: %s\n", n.ContentID)
 		fmt.Printf("FileName: %s\n", n.Filename)
 		fmt.Printf("Name: %s\n", n.Name)
-		fmt.Printf("IsInline: %v\n", IsInlineAttachment(n))
+		fmt.Printf("IsInline: %v\n", n.IsInlineAttachment())
 		fmt.Printf("IsTnef: %v\n", n.IsTnef("CONTENT-TYPE"))
-		fmt.Printf("Size: %d\n", len(GetDecodedContent(n)))
+		fmt.Printf("Size: %d\n", len(n.GetDecodedContent()))
 	}
 }
